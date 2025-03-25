@@ -1,17 +1,13 @@
-//Lab 9-2.cpp - displays two monthly car payments
-//Created/revised by <your name> on <current date>
-
 #include <iostream>
 #include <cmath>
 #include <iomanip>
 using namespace std;
 
-//function prototype
-double getPayment(int, double, int);
+// Function prototype (changed return type to void)
+void getPayment(int prin, double monthRate, int months, double &total);
 
 int main()
 {
-    //declare variables
     int carPrice = 0;
     int rebate = 0;
     double creditRate = 0.0;
@@ -19,7 +15,10 @@ int main()
     int term = 0;
     double creditPayment = 0.0;
     double dealerPayment = 0.0;
+    double totalCredit = 0.0;
+    double totalDealer = 0.0;
 
+    // Input values from the user
     cout << "Car price (after any trade-in): ";
     cin >> carPrice;
     cout << "Rebate: ";
@@ -31,30 +30,42 @@ int main()
     cout << "Term in years: ";
     cin >> term;
 
-    //call function to calculate payments
-    creditPayment = getPayment(carPrice - rebate,
-        creditRate / 12, term * 12);
-    dealerPayment = getPayment(carPrice, 
-        dealerRate / 12, term * 12);    //assign values to calculate payments
-    
-    //display payments
-    cout << fixed << setprecision(2) << endl; 
-    cout << "Credit union payment: $" 
-        << creditPayment << endl;
-    cout << "Dealer payment: $"
-        << dealerPayment << endl;
-    
-    return 0;
-}//end of main function    
+    // Call function to calculate payments (no return value)
+    getPayment(carPrice - rebate, creditRate / 12, term * 12, creditPayment);
+    getPayment(carPrice, dealerRate / 12, term * 12, dealerPayment);
 
-    //*****function definitions*****
-double getPayment(int prin,
-                  double monthRate, 
-                  int months)
+    // Display the monthly payments
+    cout << fixed << setprecision(2) << endl;
+    if (creditPayment == -1 || dealerPayment == -1) {
+        cout << "Error: Invalid loan parameters (denominator was 0)." << endl;
+    } else {
+        cout << "Credit union payment: $" << creditPayment << endl;
+        cout << "Dealer payment: $" << dealerPayment << endl;
+
+        // Calculate and display the total amounts paid
+        totalCredit = creditPayment * term * 12;
+        totalDealer = dealerPayment * term * 12;
+
+        cout << "Total paid for the car through the credit union: $" << totalCredit << endl;
+        cout << "Total paid for the car through the dealer: $" << totalDealer << endl;
+    }
+
+    return 0;
+} // End of main function
+
+// Function to calculate the monthly payment (void function, modifies 'total')
+void getPayment(int prin, double monthRate, int months, double &total)
 {
-    //calculates and returns a monthly payment
-    double monthPay = 0.0;
-    monthPay = prin * monthRate / 
-        (1 - pow(monthRate + 1, -months));
-    return monthPay;
-} //end of getPayment function//*****function definition*****
+    // Verify that the denominator is not zero
+    double denominator = (1 - pow(monthRate + 1, -months));
+    if (denominator == 0) {
+        total = -1;  // Set total to -1 to indicate error
+        return;  // Exit the function if error occurs
+    }
+
+    // Calculate the monthly payment if the denominator is not zero
+    double monthPay = prin * monthRate / denominator;
+
+    // Update the total (total is passed by reference, so we modify the original variable)
+    total = monthPay;
+}
